@@ -5,25 +5,31 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
+import android.provider.ContactsContract;
 
 import com.example.checklist.Adapter.ToDoAdapter;
 import com.example.checklist.Model.ToDoModel;
+import com.example.checklist.Utils.DatabaseHandler;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements DialogCloseListener {
 
     private RecyclerView tasksRecyclerView;
     private ToDoAdapter tasksAdapter;
 
     private List<ToDoModel> taskList;
+    public DatabaseHandler db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         getSupportActionBar().hide();
+
+        db = new DatabaseHandler(this);
 
         taskList = new ArrayList<>();
 
@@ -32,17 +38,16 @@ public class MainActivity extends AppCompatActivity {
         tasksAdapter = new ToDoAdapter(this);
         tasksRecyclerView.setAdapter(tasksAdapter);
 
-        ToDoModel task = new ToDoModel();
-        task.setTask("This is a Test Task");
-        task.setStatus(0);
-        task.setId(1);
-
-        taskList.add(task);
-        taskList.add(task);
-        taskList.add(task);
-        taskList.add(task);
-        taskList.add(task);
-
+        taskList = db.getAllTasks();
+        Collections.reverse(taskList);
         tasksAdapter.setTasks(taskList);
+    }
+
+    @Override
+    public void handleDialogClose(DialogCloseListener dialog){
+        taskList = db.getAllTasks();
+        Collections.reverse(taskList);
+        tasksAdapter.setTasks(taskList);
+        tasksAdapter.notifyDataSetChanged();
     }
 }
